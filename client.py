@@ -1,23 +1,29 @@
-import socket 
+import socket
 
-HOST = '127.0.0.01'
+HOST = '127.0.0.1'
 PORT = 5000
 
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-client_socket.settimeout(3.0)
+client_socket.settimeout(5.0)
 
-message = "EMERGENCY: system failure detected in sector 3!"
+
 
 try:
-  print(f"[*] sending alert to {HOST}:{PORT}...")
-  client_socket.sendto(message.encode('utf-8'),(HOST,PORT))
+    print(f"[*] Registering ...")
+    client_socket.sendto("REGISTER".encode('utf-8'), (HOST,PORT))
+    response, _ = client_socket.recvefrom(1024)
+    print(f"[SERVER RESPONSE] {response.decode('utf-8')}")
 
-  response_data, server_address = client_socket.recvfrom(1024)
-  print(f"[SERVER RESPONSE] { response_data.decode('utf-8')}")
+ 
+    print("[*] Sending Emergency Alert...")
+    client_socket.sendto("ALERT: Fire in  Building A!".encode('utf-8'),(HOST,PORT))
+    response, _ = client_socket.recvfrom(1024)
+    print(f"[SERVER RESPONSE] {response.decode('utf-8')}")
 
-except socket.timeout:
-   print("[-] Request timed out! Is server.py running?")
-except Exception as e:
-  print(f"[-] Error: {e}")
+except  Exception as e:
+   print(f"[!] Error: {e}")
 finally:
-  client_socket.close()
+   client_socket.close()
+
+
+
