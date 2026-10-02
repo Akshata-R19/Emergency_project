@@ -1,15 +1,26 @@
- import socket
-server=socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+import socket
 
-server.blind(("127.0.0.1",5000))
+HOST = '127.0.0.1'
+PORT = 5000
 
-print("UDP Emergency server started...")
-print("waiting for  emergency message...")
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+server_socket.bind((HOST,PORT))
 
-while true:
-   data,address=server.recvfrom(1024)
+print(f"[*] Emergency UDP server started on { HOST}:{PORT}")
+print("[*] waiting  for  incoming  emergency alerts...\n")
 
-   message = data.decode()
+try:
+  while True:
+    data,client_address = server_socket.recvfrom(1024)
+    message = data.decode('utf-8')
 
-   print("Emergency message received:", message)
-   print("From:",address)
+    print(f"[ALERT RECEIVED] from {client_address}:{message}")
+
+    response = f"ACK: Emergency notification received!"
+    server_socket.sendto(response.encode('utf-8'),client_address)
+
+except KeyboardInterrupt:
+   print("\n[-] shutting down server...")
+finally:
+   server_socket.close()

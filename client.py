@@ -1,11 +1,23 @@
-import socket
+import socket 
 
-client = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+HOST = '127.0.0.01'
+PORT = 5000
 
+client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+client_socket.settimeout(3.0)
 
-message = input("Enter emergency message:")
+message = "EMERGENCY: system failure detected in sector 3!"
 
+try:
+  print(f"[*] sending alert to {HOST}:{PORT}...")
+  client_socket.sendto(message.encode('utf-8'),(HOST,PORT))
 
-client.sendto(message.encode(),("127.0.0.1",5000))
+  response_data, server_address = client_socket.recvfrom(1024)
+  print(f"[SERVER RESPONSE] { response_data.decode('utf-8')}")
 
-print("Emergrncy message sent!")
+except socket.timeout:
+   print("[-] Request timed out! Is server.py running?")
+except Exception as e:
+  print(f"[-] Error: {e}")
+finally:
+  client_socket.close()
